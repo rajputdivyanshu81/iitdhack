@@ -9,7 +9,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing playHistory or currentQueue' }, { status: 400 });
     }
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
 
     const prompt = `
       You are a music recommendation engine. 
@@ -23,11 +23,15 @@ export async function POST(req: Request) {
     const result = await model.generateContent(prompt);
     const textResponse = result.response.text();
     
+    // Extract JSON from potentially markdown-wrapped response
+    const jsonMatch = textResponse.match(/\[.*\]|\{.*\}/s);
+    const cleanedJson = jsonMatch ? jsonMatch[0] : textResponse;
+
     try {
-      const recommendations = JSON.parse(textResponse);
+      const recommendations = JSON.parse(cleanedJson);
       return NextResponse.json({ recommendations });
     } catch (parseError) {
-      console.error('[RecommendAPI] JSON Parse Error:', parseError);
+      console.error('[RecommendAPI] JSON Parse Error:', parseError, 'Raw response:', textResponse);
       return NextResponse.json({ error: 'Failed to parse AI response' }, { status: 500 });
     }
 
