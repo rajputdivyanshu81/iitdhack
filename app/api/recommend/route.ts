@@ -24,7 +24,7 @@ export async function POST(req: Request) {
     const textResponse = result.response.text();
     
     // Extract JSON from potentially markdown-wrapped response
-    const jsonMatch = textResponse.match(/\[.*\]|\{.*\}/s);
+    const jsonMatch = textResponse.match(/\[[\s\S]*\]|\{[\s\S]*\}/);
     const cleanedJson = jsonMatch ? jsonMatch[0] : textResponse;
 
     try {
